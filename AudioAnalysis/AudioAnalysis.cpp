@@ -4,9 +4,27 @@
 
 #pragma comment(lib, "libfftwf-3.3.lib")
 
+//Create the audio analysis object
 HRESULT AudioAnalysisCreate (
 	const AUDIO_ANALYSIS_DESC* pDesc,
 	IAudioAnalysis** ppAudioAnalysis
 ) {
+	if (pDesc == nullptr || ppAudioAnalysis == nullptr) {
+		return E_POINTER;
+	}
 
+	HRESULT hr = S_OK;
+
+	CComPtr<CAudioAnalysis> Analysis = new CAudioAnalysis();
+
+	hr = Analysis->Initialize(*pDesc);
+
+	if (FAILED(hr)) {
+		*ppAudioAnalysis = nullptr;
+		return hr;
+	}
+
+	*ppAudioAnalysis = Analysis;
+
+	return S_OK;
 }

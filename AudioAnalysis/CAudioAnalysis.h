@@ -29,6 +29,8 @@ public:
 		return refcount;
 	}
 
+	HRESULT Initialize(const AUDIO_ANALYSIS_DESC& Desc);
+
 private:
 	long m_RefCount;
 };
