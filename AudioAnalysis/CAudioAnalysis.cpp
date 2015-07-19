@@ -2,7 +2,9 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 
+#define FILENAME L"CAudioAnalysis.cpp"
 #define FFTWF_FREE(x) if (x != nullptr) { fftwf_free(x); x = nullptr; }
+#define CHECK_ALLOC(x, Line) if (x == nullptr) { m_Callback->OnObjectFailure(FILENAME, Line, E_FAIL); return; }
 
 CAudioAnalysis::CAudioAnalysis() :
 m_RefCount(1),
@@ -36,24 +38,32 @@ CAudioAnalysis::~CAudioAnalysis() {
 	FFTWF_FREE(m_SideTransform);
 }
 
-HRESULT CAudioAnalysis::Initialize(const AUDIO_ANALYSIS_DESC& Desc) {
-	m_HistoryBuffer = fftwf_alloc_real(IDEAL_BUFFER_SIZE * 2);
-	m_ProcessBuffer = fftwf_alloc_real(IDEAL_BUFFER_SIZE);
-	m_ComplexBuffer = fftwf_alloc_complex(IDEAL_BUFFER_SIZE / 2 + 1);
-	m_Window = fftwf_alloc_real(IDEAL_BUFFER_SIZE);
-	m_Plan = fftwf_plan_dft_r2c_1d(IDEAL_BUFFER_SIZE, m_ProcessBuffer, m_ComplexBuffer, 0);
+HRESULT CAudioAnalysis::Initialize(const AUDIO_ANALYSIS_DESC& Desc, CComPtr<IAudioAnalysisCallback> Callback) {
+	m_Callback = Callback;
 
-	m_MonoMix = fftwf_alloc_real(IDEAL_BUFFER_SIZE);
-	m_LeftMix = fftwf_alloc_real(IDEAL_BUFFER_SIZE);
-	m_RightMix = fftwf_alloc_real(IDEAL_BUFFER_SIZE);
-	m_MiddleMix = fftwf_alloc_real(IDEAL_BUFFER_SIZE);
-	m_SideMix = fftwf_alloc_real(IDEAL_BUFFER_SIZE);
+	m_HistoryBuffer = fftwf_alloc_real(IDEAL_BUFFER_SIZE * 2); CHECK_ALLOC(m_HistoryBuffer, __LINE__);
+	m_ProcessBuffer = fftwf_alloc_real(IDEAL_BUFFER_SIZE); CHECK_ALLOC(m_ProcessBuffer, __LINE__);
+	m_ComplexBuffer = fftwf_alloc_complex(IDEAL_BUFFER_SIZE / 2 + 1); CHECK_ALLOC(m_ComplexBuffer, __LINE__);
+	m_Window = fftwf_alloc_real(IDEAL_BUFFER_SIZE); CHECK_ALLOC(m_Window, __LINE__);
 
-	m_MonoTransform = fftwf_alloc_real(IDEAL_BUFFER_SIZE / 2);
-	m_LeftTransform = fftwf_alloc_real(IDEAL_BUFFER_SIZE / 2);
-	m_RightTransform = fftwf_alloc_real(IDEAL_BUFFER_SIZE / 2);
-	m_MiddleTransform = fftwf_alloc_real(IDEAL_BUFFER_SIZE / 2);
-	m_SideTransform = fftwf_alloc_real(IDEAL_BUFFER_SIZE / 2);
+	m_Plan = fftwf_plan_dft_r2c_1d (
+		IDEAL_BUFFER_SIZE,
+		m_ProcessBuffer,
+		m_ComplexBuffer,
+		0)
+	; CHECK_ALLOC(m_Plan, __LINE__);
+
+	m_MonoMix = fftwf_alloc_real(IDEAL_BUFFER_SIZE); CHECK_ALLOC(m_MonoMix, __LINE__);
+	m_LeftMix = fftwf_alloc_real(IDEAL_BUFFER_SIZE); CHECK_ALLOC(m_LeftMix, __LINE__);
+	m_RightMix = fftwf_alloc_real(IDEAL_BUFFER_SIZE); CHECK_ALLOC(m_RightMix, __LINE__);
+	m_MiddleMix = fftwf_alloc_real(IDEAL_BUFFER_SIZE); CHECK_ALLOC(m_MiddleMix, __LINE__);
+	m_SideMix = fftwf_alloc_real(IDEAL_BUFFER_SIZE); CHECK_ALLOC(m_SideMix, __LINE__);
+
+	m_MonoTransform = fftwf_alloc_real(IDEAL_BUFFER_SIZE / 2); CHECK_ALLOC(m_MonoTransform, __LINE__);
+	m_LeftTransform = fftwf_alloc_real(IDEAL_BUFFER_SIZE / 2); CHECK_ALLOC(m_LeftTransform, __LINE__);
+	m_RightTransform = fftwf_alloc_real(IDEAL_BUFFER_SIZE / 2); CHECK_ALLOC(m_RightTransform, __LINE__);
+	m_MiddleTransform = fftwf_alloc_real(IDEAL_BUFFER_SIZE / 2); CHECK_ALLOC(m_MiddleTransform, __LINE__);
+	m_SideTransform = fftwf_alloc_real(IDEAL_BUFFER_SIZE / 2); CHECK_ALLOC(m_SideTransform, __LINE__);
 
 	//Use Blackman-Nuttall
 	float a0 = 0.3635819f;

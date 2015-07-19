@@ -7,9 +7,11 @@
 //Create the audio analysis object
 HRESULT AudioAnalysisCreate (
 	const AUDIO_ANALYSIS_DESC* pDesc,
+	IAudioAnalysisCallback* pAudioAnalysisCallback,
 	IAudioAnalysis** ppAudioAnalysis
 ) {
-	if (pDesc == nullptr || ppAudioAnalysis == nullptr) {
+	if (pDesc == nullptr || pAudioAnalysisCallback == nullptr ||
+		ppAudioAnalysis == nullptr) {
 		return E_POINTER;
 	}
 
@@ -17,7 +19,7 @@ HRESULT AudioAnalysisCreate (
 
 	CComPtr<CAudioAnalysis> Analysis = new CAudioAnalysis();
 
-	hr = Analysis->Initialize(*pDesc);
+	hr = Analysis->Initialize(*pDesc, pAudioAnalysisCallback);
 
 	if (FAILED(hr)) {
 		*ppAudioAnalysis = nullptr;

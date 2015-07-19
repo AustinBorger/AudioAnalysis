@@ -1,6 +1,7 @@
 #include "AudioAnalysis.h"
 #include "fftw3.h"
 #include "QueryInterface.h"
+#include <atlbase.h>
 
 #define IDEAL_BUFFER_SIZE 2048
 
@@ -17,18 +18,18 @@ public:
 	}
 
 	ULONG STDMETHODCALLTYPE AddRef() {
-		return InterlockedIncrement(&m_RefCount);
+		return ++m_RefCount;
 	}
 
 	ULONG STDMETHODCALLTYPE Release() {
-		long refcount = InterlockedDecrement(&m_RefCount);
+		m_RefCount--;
 
-		if (refcount <= 0) {
+		if (m_RefCount <= 0) {
 			delete this;
 			return 0;
 		}
 
-		return refcount;
+		return m_RefCount;
 	}
 
 	VOID STDMETHODCALLTYPE Post(PFLOAT Buffer, UINT BufferFrames) final;
@@ -43,10 +44,12 @@ public:
 		return IDEAL_BUFFER_SIZE / 2;
 	}
 
-	HRESULT Initialize(const AUDIO_ANALYSIS_DESC& Desc);
+	HRESULT Initialize(const AUDIO_ANALYSIS_DESC& Desc, CComPtr<IAudioAnalysisCallback> Callback);
 
 private:
 	long m_RefCount;
+
+	CComPtr<IAudioAnalysisCallback> m_Callback;
 
 	PFLOAT m_HistoryBuffer;
 
