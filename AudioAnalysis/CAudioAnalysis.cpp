@@ -28,13 +28,11 @@ CAudioAnalysis::~CAudioAnalysis() {
 	FFTWF_FREE(m_MonoMix);
 	FFTWF_FREE(m_LeftMix);
 	FFTWF_FREE(m_RightMix);
-	FFTWF_FREE(m_MiddleMix);
 	FFTWF_FREE(m_SideMix);
 
 	FFTWF_FREE(m_MonoTransform);
 	FFTWF_FREE(m_LeftTransform);
 	FFTWF_FREE(m_RightTransform);
-	FFTWF_FREE(m_MiddleTransform);
 	FFTWF_FREE(m_SideTransform);
 }
 
@@ -56,13 +54,11 @@ HRESULT CAudioAnalysis::Initialize(const AUDIO_ANALYSIS_DESC& Desc, CComPtr<IAud
 	m_MonoMix = fftwf_alloc_real(IDEAL_BUFFER_SIZE); CHECK_ALLOC(m_MonoMix, __LINE__);
 	m_LeftMix = fftwf_alloc_real(IDEAL_BUFFER_SIZE); CHECK_ALLOC(m_LeftMix, __LINE__);
 	m_RightMix = fftwf_alloc_real(IDEAL_BUFFER_SIZE); CHECK_ALLOC(m_RightMix, __LINE__);
-	m_MiddleMix = fftwf_alloc_real(IDEAL_BUFFER_SIZE); CHECK_ALLOC(m_MiddleMix, __LINE__);
 	m_SideMix = fftwf_alloc_real(IDEAL_BUFFER_SIZE); CHECK_ALLOC(m_SideMix, __LINE__);
 
 	m_MonoTransform = fftwf_alloc_real(IDEAL_BUFFER_SIZE / 2); CHECK_ALLOC(m_MonoTransform, __LINE__);
 	m_LeftTransform = fftwf_alloc_real(IDEAL_BUFFER_SIZE / 2); CHECK_ALLOC(m_LeftTransform, __LINE__);
 	m_RightTransform = fftwf_alloc_real(IDEAL_BUFFER_SIZE / 2); CHECK_ALLOC(m_RightTransform, __LINE__);
-	m_MiddleTransform = fftwf_alloc_real(IDEAL_BUFFER_SIZE / 2); CHECK_ALLOC(m_MiddleTransform, __LINE__);
 	m_SideTransform = fftwf_alloc_real(IDEAL_BUFFER_SIZE / 2); CHECK_ALLOC(m_SideTransform, __LINE__);
 
 	//Use Blackman-Nuttall
@@ -95,13 +91,11 @@ VOID CAudioAnalysis::Process() {
 	GenerateMono();
 	GenerateLeft();
 	GenerateRight();
-	GenerateMiddle();
 	GenerateSide();
 
 	ProcessMix(m_MonoMix, m_MonoTransform);
 	ProcessMix(m_LeftMix, m_LeftTransform);
 	ProcessMix(m_RightMix, m_RightTransform);
-	ProcessMix(m_MiddleMix, m_MiddleTransform);
 	ProcessMix(m_SideMix, m_SideTransform);
 }
 
@@ -122,14 +116,6 @@ VOID CAudioAnalysis::GenerateLeft() {
 VOID CAudioAnalysis::GenerateRight() {
 	for (UINT n = 0; n < IDEAL_BUFFER_SIZE; n++) {
 		m_RightMix[n] = m_HistoryBuffer[n * 2 + 1];
-	}
-}
-
-VOID CAudioAnalysis::GenerateMiddle() {
-	for (UINT n = 0; n < IDEAL_BUFFER_SIZE; n++) {
-		m_MiddleMix[n] = m_HistoryBuffer[n * 2];
-		m_MiddleMix[n] += m_HistoryBuffer[n * 2 + 1];
-		m_MiddleMix[n] /= sqrt(2.0f);
 	}
 }
 

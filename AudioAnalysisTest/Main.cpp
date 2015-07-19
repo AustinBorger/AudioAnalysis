@@ -6,5 +6,7 @@
 #pragma comment(lib, "AudioAnalysis.lib")
 
 int APIENTRY wWinMain(HINSTANCE, HINSTANCE, LPWSTR, int) {
+	HRESULT hr = S_OK;
+
 	return 0;
 }

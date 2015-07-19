@@ -56,10 +56,6 @@ public:
 		return m_RightMix;
 	}
 
-	CONST PFLOAT STDMETHODCALLTYPE GetMiddleMix() final {
-		return m_MiddleMix;
-	}
-
 	CONST PFLOAT STDMETHODCALLTYPE GetSideMix() final {
 		return m_SideMix;
 	}
@@ -74,10 +70,6 @@ public:
 
 	CONST PFLOAT STDMETHODCALLTYPE GetRightTransform() final {
 		return m_RightTransform;
-	}
-
-	CONST PFLOAT STDMETHODCALLTYPE GetMiddleTransform() final {
-		return m_MiddleTransform;
 	}
 
 	CONST PFLOAT STDMETHODCALLTYPE GetSideTransform() final {
@@ -102,13 +94,11 @@ private:
 	PFLOAT m_MonoMix;
 	PFLOAT m_LeftMix;
 	PFLOAT m_RightMix;
-	PFLOAT m_MiddleMix;
 	PFLOAT m_SideMix;
 
 	PFLOAT m_MonoTransform;
 	PFLOAT m_LeftTransform;
 	PFLOAT m_RightTransform;
-	PFLOAT m_MiddleTransform;
 	PFLOAT m_SideTransform;
 
 	VOID GenerateMono();
@@ -116,8 +106,6 @@ private:
 	VOID GenerateLeft();
 
 	VOID GenerateRight();
-
-	VOID GenerateMiddle();
 
 	VOID GenerateSide();
 
