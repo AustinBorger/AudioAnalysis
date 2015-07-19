@@ -44,6 +44,46 @@ public:
 		return IDEAL_BUFFER_SIZE / 2;
 	}
 
+	CONST PFLOAT STDMETHODCALLTYPE GetMonoMix() final {
+		return m_MonoMix;
+	}
+
+	CONST PFLOAT STDMETHODCALLTYPE GetLeftMix() final {
+		return m_LeftMix;
+	}
+
+	CONST PFLOAT STDMETHODCALLTYPE GetRightMix() final {
+		return m_RightMix;
+	}
+
+	CONST PFLOAT STDMETHODCALLTYPE GetMiddleMix() final {
+		return m_MiddleMix;
+	}
+
+	CONST PFLOAT STDMETHODCALLTYPE GetSideMix() final {
+		return m_SideMix;
+	}
+
+	CONST PFLOAT STDMETHODCALLTYPE GetMonoTransform() final {
+		return m_MonoTransform;
+	}
+
+	CONST PFLOAT STDMETHODCALLTYPE GetLeftTransform() final {
+		return m_LeftTransform;
+	}
+
+	CONST PFLOAT STDMETHODCALLTYPE GetRightTransform() final {
+		return m_RightTransform;
+	}
+
+	CONST PFLOAT STDMETHODCALLTYPE GetMiddleTransform() final {
+		return m_MiddleTransform;
+	}
+
+	CONST PFLOAT STDMETHODCALLTYPE GetSideTransform() final {
+		return m_SideTransform;
+	}
+
 	HRESULT Initialize(const AUDIO_ANALYSIS_DESC& Desc, CComPtr<IAudioAnalysisCallback> Callback);
 
 private:

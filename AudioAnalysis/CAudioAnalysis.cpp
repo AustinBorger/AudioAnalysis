@@ -4,7 +4,7 @@
 
 #define FILENAME L"CAudioAnalysis.cpp"
 #define FFTWF_FREE(x) if (x != nullptr) { fftwf_free(x); x = nullptr; }
-#define CHECK_ALLOC(x, Line) if (x == nullptr) { m_Callback->OnObjectFailure(FILENAME, Line, E_FAIL); return; }
+#define CHECK_ALLOC(x, Line) if (x == nullptr) { m_Callback->OnObjectFailure(FILENAME, Line, E_FAIL); return E_FAIL; }
 
 CAudioAnalysis::CAudioAnalysis() :
 m_RefCount(1),
@@ -75,10 +75,12 @@ HRESULT CAudioAnalysis::Initialize(const AUDIO_ANALYSIS_DESC& Desc, CComPtr<IAud
 
 	for (UINT n = 0; n < N; n++) {
 		m_Window[n] = a0;
-		m_Window[n] -= (a1 * cos((1.0f * 2.0f * M_PI * n) / (N - 1)));
-		m_Window[n] += (a2 * cos((2.0f * 2.0f * M_PI * n) / (N - 1)));
-		m_Window[n] -= (a3 * cos((3.0f * 2.0f * M_PI * n) / (N - 1)));
+		m_Window[n] -= (a1 * cos((1.0f * 2.0f * FLOAT(M_PI) * n) / (N - 1)));
+		m_Window[n] += (a2 * cos((2.0f * 2.0f * FLOAT(M_PI) * n) / (N - 1)));
+		m_Window[n] -= (a3 * cos((3.0f * 2.0f * FLOAT(M_PI) * n) / (N - 1)));
 	}
+
+	return S_OK;
 }
 
 VOID CAudioAnalysis::Post(PFLOAT Buffer, UINT BufferFrames) {
