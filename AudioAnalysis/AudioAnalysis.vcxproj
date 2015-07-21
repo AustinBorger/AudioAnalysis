@@ -70,12 +70,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="AudioAnalysis.h" />
-    <ClInclude Include="CAudioAnalysis.h" />
+    <ClInclude Include="StereoFFT.h" />
+    <ClInclude Include="CStereoFFT.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="AudioAnalysis.cpp" />
-    <ClCompile Include="CAudioAnalysis.cpp" />
+    <ClCompile Include="StereoFFT.cpp" />
+    <ClCompile Include="CStereoFFT.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
