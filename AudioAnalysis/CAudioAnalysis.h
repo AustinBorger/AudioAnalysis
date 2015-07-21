@@ -3,8 +3,6 @@
 #include "QueryInterface.h"
 #include <atlbase.h>
 
-#define IDEAL_BUFFER_SIZE 2048
-
 class CAudioAnalysis : public IAudioAnalysis {
 public:
 	CAudioAnalysis();
@@ -37,15 +35,11 @@ public:
 	VOID STDMETHODCALLTYPE Process() final;
 
 	UINT STDMETHODCALLTYPE GetNumSamples() final {
-		return IDEAL_BUFFER_SIZE;
+		return m_NumSamples;
 	}
 
 	UINT STDMETHODCALLTYPE GetNumBins() final {
-		return IDEAL_BUFFER_SIZE / 2;
-	}
-
-	CONST PFLOAT STDMETHODCALLTYPE GetMonoMix() final {
-		return m_MonoMix;
+		return m_NumSamples;
 	}
 
 	CONST PFLOAT STDMETHODCALLTYPE GetLeftMix() final {
@@ -56,12 +50,12 @@ public:
 		return m_RightMix;
 	}
 
-	CONST PFLOAT STDMETHODCALLTYPE GetSideMix() final {
-		return m_SideMix;
+	CONST PFLOAT STDMETHODCALLTYPE GetMidMix() final {
+		return m_MidMix;
 	}
 
-	CONST PFLOAT STDMETHODCALLTYPE GetMonoTransform() final {
-		return m_MonoTransform;
+	CONST PFLOAT STDMETHODCALLTYPE GetSideMix() final {
+		return m_SideMix;
 	}
 
 	CONST PFLOAT STDMETHODCALLTYPE GetLeftTransform() final {
@@ -72,14 +66,36 @@ public:
 		return m_RightTransform;
 	}
 
+	CONST PFLOAT STDMETHODCALLTYPE GetMidTransform() final {
+		return m_MidTransform;
+	}
+
 	CONST PFLOAT STDMETHODCALLTYPE GetSideTransform() final {
 		return m_SideTransform;
+	}
+
+	FLOAT STDMETHODCALLTYPE GetLeftDCOffset() final {
+		return m_LeftDC;
+	}
+
+	FLOAT STDMETHODCALLTYPE GetRightDCOffset() final {
+		return m_RightDC;
+	}
+
+	FLOAT STDMETHODCALLTYPE GetMidDCOffset() final {
+		return m_MidDC;
+	}
+
+	FLOAT STDMETHODCALLTYPE GetSideDCOffset() final {
+		return m_SideDC;
 	}
 
 	HRESULT Initialize(const AUDIO_ANALYSIS_DESC& Desc, CComPtr<IAudioAnalysisCallback> Callback);
 
 private:
 	long m_RefCount;
+
+	UINT m_NumSamples;
 
 	CComPtr<IAudioAnalysisCallback> m_Callback;
 
@@ -91,23 +107,28 @@ private:
 
 	fftwf_plan m_Plan;
 
-	PFLOAT m_MonoMix;
 	PFLOAT m_LeftMix;
 	PFLOAT m_RightMix;
+	PFLOAT m_MidMix;
 	PFLOAT m_SideMix;
 
-	PFLOAT m_MonoTransform;
 	PFLOAT m_LeftTransform;
 	PFLOAT m_RightTransform;
+	PFLOAT m_MidTransform;
 	PFLOAT m_SideTransform;
 
-	VOID GenerateMono();
+	FLOAT m_LeftDC;
+	FLOAT m_RightDC;
+	FLOAT m_MidDC;
+	FLOAT m_SideDC;
 
 	VOID GenerateLeft();
 
 	VOID GenerateRight();
 
+	VOID GenerateMid();
+
 	VOID GenerateSide();
 
-	VOID ProcessMix(PFLOAT Mix, PFLOAT Transform);
+	VOID ProcessMix(PFLOAT Mix, PFLOAT Transform, FLOAT& DC);
 };

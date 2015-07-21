@@ -8,6 +8,7 @@
 
 CAudioAnalysis::CAudioAnalysis() :
 m_RefCount(1),
+m_NumSamples(0),
 m_ComplexBuffer(nullptr),
 m_ProcessBuffer(nullptr),
 m_Window(nullptr),
@@ -25,41 +26,42 @@ CAudioAnalysis::~CAudioAnalysis() {
 		m_Plan = nullptr;
 	}
 
-	FFTWF_FREE(m_MonoMix);
 	FFTWF_FREE(m_LeftMix);
 	FFTWF_FREE(m_RightMix);
+	FFTWF_FREE(m_MidMix);
 	FFTWF_FREE(m_SideMix);
 
-	FFTWF_FREE(m_MonoTransform);
 	FFTWF_FREE(m_LeftTransform);
 	FFTWF_FREE(m_RightTransform);
+	FFTWF_FREE(m_MidTransform);
 	FFTWF_FREE(m_SideTransform);
 }
 
 HRESULT CAudioAnalysis::Initialize(const AUDIO_ANALYSIS_DESC& Desc, CComPtr<IAudioAnalysisCallback> Callback) {
 	m_Callback = Callback;
+	m_NumSamples = Desc.NumSamples;
 
-	m_HistoryBuffer = fftwf_alloc_real(IDEAL_BUFFER_SIZE * 2); CHECK_ALLOC(m_HistoryBuffer, __LINE__);
-	m_ProcessBuffer = fftwf_alloc_real(IDEAL_BUFFER_SIZE); CHECK_ALLOC(m_ProcessBuffer, __LINE__);
-	m_ComplexBuffer = fftwf_alloc_complex(IDEAL_BUFFER_SIZE / 2 + 1); CHECK_ALLOC(m_ComplexBuffer, __LINE__);
-	m_Window = fftwf_alloc_real(IDEAL_BUFFER_SIZE); CHECK_ALLOC(m_Window, __LINE__);
+	m_HistoryBuffer = fftwf_alloc_real(m_NumSamples * 2); CHECK_ALLOC(m_HistoryBuffer, __LINE__);
+	m_ProcessBuffer = fftwf_alloc_real(m_NumSamples); CHECK_ALLOC(m_ProcessBuffer, __LINE__);
+	m_ComplexBuffer = fftwf_alloc_complex(m_NumSamples / 2 + 1); CHECK_ALLOC(m_ComplexBuffer, __LINE__);
+	m_Window = fftwf_alloc_real(m_NumSamples); CHECK_ALLOC(m_Window, __LINE__);
 
 	m_Plan = fftwf_plan_dft_r2c_1d (
-		IDEAL_BUFFER_SIZE,
+		m_NumSamples,
 		m_ProcessBuffer,
 		m_ComplexBuffer,
-		0)
-	; CHECK_ALLOC(m_Plan, __LINE__);
+		0
+	); CHECK_ALLOC(m_Plan, __LINE__);
 
-	m_MonoMix = fftwf_alloc_real(IDEAL_BUFFER_SIZE); CHECK_ALLOC(m_MonoMix, __LINE__);
-	m_LeftMix = fftwf_alloc_real(IDEAL_BUFFER_SIZE); CHECK_ALLOC(m_LeftMix, __LINE__);
-	m_RightMix = fftwf_alloc_real(IDEAL_BUFFER_SIZE); CHECK_ALLOC(m_RightMix, __LINE__);
-	m_SideMix = fftwf_alloc_real(IDEAL_BUFFER_SIZE); CHECK_ALLOC(m_SideMix, __LINE__);
+	m_LeftMix = fftwf_alloc_real(m_NumSamples); CHECK_ALLOC(m_LeftMix, __LINE__);
+	m_RightMix = fftwf_alloc_real(m_NumSamples); CHECK_ALLOC(m_RightMix, __LINE__);
+	m_MidMix = fftwf_alloc_real(m_NumSamples); CHECK_ALLOC(m_MidMix, __LINE__);
+	m_SideMix = fftwf_alloc_real(m_NumSamples); CHECK_ALLOC(m_SideMix, __LINE__);
 
-	m_MonoTransform = fftwf_alloc_real(IDEAL_BUFFER_SIZE / 2); CHECK_ALLOC(m_MonoTransform, __LINE__);
-	m_LeftTransform = fftwf_alloc_real(IDEAL_BUFFER_SIZE / 2); CHECK_ALLOC(m_LeftTransform, __LINE__);
-	m_RightTransform = fftwf_alloc_real(IDEAL_BUFFER_SIZE / 2); CHECK_ALLOC(m_RightTransform, __LINE__);
-	m_SideTransform = fftwf_alloc_real(IDEAL_BUFFER_SIZE / 2); CHECK_ALLOC(m_SideTransform, __LINE__);
+	m_LeftTransform = fftwf_alloc_real(m_NumSamples / 2); CHECK_ALLOC(m_LeftTransform, __LINE__);
+	m_RightTransform = fftwf_alloc_real(m_NumSamples / 2); CHECK_ALLOC(m_RightTransform, __LINE__);
+	m_SideTransform = fftwf_alloc_real(m_NumSamples / 2); CHECK_ALLOC(m_SideTransform, __LINE__);
+	m_MidTransform = fftwf_alloc_real(m_NumSamples / 2); CHECK_ALLOC(m_MidTransform, __LINE__);
 
 	//Use Blackman-Nuttall
 	float a0 = 0.3635819f;
@@ -67,7 +69,7 @@ HRESULT CAudioAnalysis::Initialize(const AUDIO_ANALYSIS_DESC& Desc, CComPtr<IAud
 	float a2 = 0.1365995f;
 	float a3 = 0.0106411f;
 
-	static const UINT N = IDEAL_BUFFER_SIZE;
+	static const UINT N = m_NumSamples;
 
 	for (UINT n = 0; n < N; n++) {
 		m_Window[n] = a0;
@@ -80,64 +82,61 @@ HRESULT CAudioAnalysis::Initialize(const AUDIO_ANALYSIS_DESC& Desc, CComPtr<IAud
 }
 
 VOID CAudioAnalysis::Post(PFLOAT Buffer, UINT BufferFrames) {
-	INT NumOld = max(0, IDEAL_BUFFER_SIZE - BufferFrames);
-	INT NumNew = min(IDEAL_BUFFER_SIZE, BufferFrames);
+	INT NumOld = max(0, m_NumSamples - BufferFrames);
+	INT NumNew = min(m_NumSamples, BufferFrames);
 	
 	memcpy(m_HistoryBuffer, m_HistoryBuffer + NumNew * 2, NumOld * 2 * sizeof(FLOAT));
 	memcpy(m_HistoryBuffer + NumOld * 2, Buffer, NumNew * 2 * sizeof(FLOAT));
 }
 
 VOID CAudioAnalysis::Process() {
-	GenerateMono();
 	GenerateLeft();
 	GenerateRight();
+	GenerateMid();
 	GenerateSide();
 
-	ProcessMix(m_MonoMix, m_MonoTransform);
-	ProcessMix(m_LeftMix, m_LeftTransform);
-	ProcessMix(m_RightMix, m_RightTransform);
-	ProcessMix(m_SideMix, m_SideTransform);
-}
-
-VOID CAudioAnalysis::GenerateMono() {
-	for (UINT n = 0; n < IDEAL_BUFFER_SIZE; n++) {
-		m_MonoMix[n] = m_HistoryBuffer[n * 2];
-		m_MonoMix[n] += m_HistoryBuffer[n * 2 + 1];
-		m_MonoMix[n] /= 2.0f;
-	}
+	ProcessMix(m_LeftMix, m_LeftTransform, m_LeftDC);
+	ProcessMix(m_RightMix, m_RightTransform, m_RightDC);
+	ProcessMix(m_MidMix, m_MidTransform, m_MidDC);
+	ProcessMix(m_SideMix, m_SideTransform, m_SideDC);
 }
 
 VOID CAudioAnalysis::GenerateLeft() {
-	for (UINT n = 0; n < IDEAL_BUFFER_SIZE; n++) {
+	for (UINT n = 0; n < m_NumSamples; n++) {
 		m_LeftMix[n] = m_HistoryBuffer[n * 2];
 	}
 }
 
 VOID CAudioAnalysis::GenerateRight() {
-	for (UINT n = 0; n < IDEAL_BUFFER_SIZE; n++) {
+	for (UINT n = 0; n < m_NumSamples; n++) {
 		m_RightMix[n] = m_HistoryBuffer[n * 2 + 1];
 	}
 }
 
-VOID CAudioAnalysis::GenerateSide() {
-	for (UINT n = 0; n < IDEAL_BUFFER_SIZE; n++) {
-		m_SideMix[n] = m_HistoryBuffer[n * 2];
-		m_SideMix[n] -= m_HistoryBuffer[n * 2 + 1];
-		m_SideMix[n] /= sqrt(2.0f);
+VOID CAudioAnalysis::GenerateMid() {
+	for (UINT n = 0; n < m_NumSamples; n++) {
+		m_MidMix[n] = m_HistoryBuffer[n * 2];
+		m_MidMix[n] += m_HistoryBuffer[n * 2 + 1];
+		m_MidMix[n] /= 2.0f;
 	}
 }
 
-VOID CAudioAnalysis::ProcessMix(PFLOAT Mix, PFLOAT Transform) {
-	memcpy(m_ProcessBuffer, Mix, IDEAL_BUFFER_SIZE * sizeof(FLOAT));
+VOID CAudioAnalysis::GenerateSide() {
+	for (UINT n = 0; n < m_NumSamples; n++) {
+		m_SideMix[n] = m_HistoryBuffer[n * 2];
+		m_SideMix[n] -= m_HistoryBuffer[n * 2 + 1];
+		m_SideMix[n] /= 2.0f;
+	}
+}
+
+VOID CAudioAnalysis::ProcessMix(PFLOAT Mix, PFLOAT Transform, FLOAT& DC) {
+	memcpy(m_ProcessBuffer, Mix, m_NumSamples * sizeof(FLOAT));
 
 	fftwf_execute(m_Plan);
 
-	float power = 0.0f;
-	float db = 0.0f;
+	DC = pow(m_ComplexBuffer[0][0], 2) + pow(m_ComplexBuffer[0][1], 2);
 
-	for (UINT n = 0; n < IDEAL_BUFFER_SIZE / 2; n++) {
-		power = pow(m_ComplexBuffer[n + 1][0], 2) + pow(m_ComplexBuffer[n + 1][1], 2);
-		db = 10.0f * log10f(1.0f + power);
-		Transform[n] = db;
+	for (UINT n = 0; n < m_NumSamples / 2; n++) {
+		Transform[n] = pow(m_ComplexBuffer[n + 1][0], 2) + pow(m_ComplexBuffer[n + 1][1], 2);
 	}
 }
