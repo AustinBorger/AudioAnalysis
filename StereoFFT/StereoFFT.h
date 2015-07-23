@@ -4,7 +4,6 @@
 #include <comdef.h>
 
 struct STEREO_FFT_DESC {
-	FLOAT SampleRate;
 	UINT NumSamples;
 };
 

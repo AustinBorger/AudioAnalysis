@@ -1,4 +1,4 @@
-﻿Build started 7/22/2015 8:55:51 PM.
+﻿Build started 7/23/2015 12:25:34 AM.
      1>Project "C:\Users\Austin\Documents\COM Objects\StereoFFT\StereoFFT_Test\StereoFFT_Test.vcxproj" on node 2 (Build target(s)).
      1>FxCompile:
          C:\Program Files (x86)\Windows Kits\8.1\bin\x86\fxc.exe /nologo /E"main" /T ps_5_0 /Fh "PixelShader.h" /Fo "C:\Users\Austin\Documents\COM Objects\StereoFFT\Release\PixelShader.cso" /Vn "PixelShader" PixelShader.hlsl 
@@ -19,4 +19,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:01.82
+Time Elapsed 00:00:01.92

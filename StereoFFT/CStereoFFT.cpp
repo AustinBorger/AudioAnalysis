@@ -61,19 +61,25 @@ HRESULT CStereoFFT::Initialize(const STEREO_FFT_DESC& Desc) {
 	m_SideTransform = fftwf_alloc_real(m_NumSamples / 2);
 	m_MidTransform = fftwf_alloc_real(m_NumSamples / 2);
 
-	//Use Blackman-Nuttall
-	float a0 = 0.3635819f;
-	float a1 = 0.4891775f;
-	float a2 = 0.1365995f;
-	float a3 = 0.0106411f;
+	//Use 7-term blackman harris
+	float a0 = 0.27105140069342f;
+	float a1 = 0.43329793923448f;
+	float a2 = 0.21812299954311f;
+	float a3 = 0.06592544638803f;
+	float a4 = 0.01081174209837f;
+	float a5 = 0.00077658482522f;
+	float a6 = 0.00001388721735f;
 
 	static const UINT N = m_NumSamples;
 
 	for (UINT n = 0; n < N; n++) {
 		m_Window[n] = a0;
-		m_Window[n] -= (a1 * cos((1.0f * 2.0f * FLOAT(M_PI) * n) / (N - 1)));
-		m_Window[n] += (a2 * cos((2.0f * 2.0f * FLOAT(M_PI) * n) / (N - 1)));
-		m_Window[n] -= (a3 * cos((3.0f * 2.0f * FLOAT(M_PI) * n) / (N - 1)));
+		m_Window[n] -= a1 * cos((1.0f * 2.0f * FLOAT(M_PI) * n) / N);
+		m_Window[n] += a2 * cos((2.0f * 2.0f * FLOAT(M_PI) * n) / N);
+		m_Window[n] -= a3 * cos((3.0f * 2.0f * FLOAT(M_PI) * n) / N);
+		m_Window[n] += a4 * cos((4.0f * 2.0f * FLOAT(M_PI) * n) / N);
+		m_Window[n] -= a5 * cos((5.0f * 2.0f * FLOAT(M_PI) * n) / N);
+		m_Window[n] += a6 * cos((6.0f * 2.0f * FLOAT(M_PI) * n) / N);
 	}
 
 	return S_OK;
@@ -134,7 +140,8 @@ VOID CStereoFFT::GenerateSide() {
 
 VOID CStereoFFT::ProcessMix(PFLOAT Mix, PFLOAT Transform, FLOAT& DC) {
 	for (UINT n = 0; n < m_NumSamples; n++) {
-		m_ProcessBuffer[n] = m_Window[n] * Mix[n];
+		m_ProcessBuffer[n] = Mix[n];
+		m_ProcessBuffer[n] *= m_Window[n];
 	}
 
 	fftwf_execute(m_Plan);

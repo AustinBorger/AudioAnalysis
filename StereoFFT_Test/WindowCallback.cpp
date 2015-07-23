@@ -101,7 +101,6 @@ VOID WindowCallback::CreateDevice() {
 	); HANDLE_HR(__LINE__);
 
 	STEREO_FFT_DESC TransformDesc;
-	TransformDesc.SampleRate = 44100;
 	TransformDesc.NumSamples = 1024;
 
 	hr = CreateStereoFFT(&TransformDesc, &m_StereoFFT);
@@ -110,8 +109,6 @@ VOID WindowCallback::CreateDevice() {
 	QueryPerformanceFrequency(&liFrequency);
 	QueryPerformanceCounter(&liOld);
 }
-
-#include <iostream>
 
 VOID WindowCallback::Render() {
 	HRESULT hr = S_OK;
