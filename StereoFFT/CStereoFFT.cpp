@@ -5,6 +5,7 @@
 #define FILENAME L"CStereoFFT.cpp"
 #define FFTWF_FREE(x) if (x != nullptr) { fftwf_free(x); x = nullptr; }
 
+//Zero-out everything (except for refcount)
 CStereoFFT::CStereoFFT() :
 m_RefCount(1),
 m_NumSamples(0),
@@ -15,6 +16,7 @@ m_Plan(nullptr)
 { }
 
 CStereoFFT::~CStereoFFT() {
+	//Free everything
 	FFTWF_FREE(m_HistoryBuffer);
 	FFTWF_FREE(m_ComplexBuffer);
 	FFTWF_FREE(m_ProcessBuffer);
@@ -39,6 +41,7 @@ CStereoFFT::~CStereoFFT() {
 HRESULT CStereoFFT::Initialize(const STEREO_FFT_DESC& Desc) {
 	m_NumSamples = Desc.NumSamples;
 
+	//Allocate all buffers
 	m_HistoryBuffer = fftwf_alloc_real(m_NumSamples * 2);
 	m_ProcessBuffer = fftwf_alloc_real(m_NumSamples);
 	m_ComplexBuffer = fftwf_alloc_complex(m_NumSamples / 2 + 1);
@@ -61,7 +64,7 @@ HRESULT CStereoFFT::Initialize(const STEREO_FFT_DESC& Desc) {
 	m_SideTransform = fftwf_alloc_real(m_NumSamples / 2);
 	m_MidTransform = fftwf_alloc_real(m_NumSamples / 2);
 
-	//Use 7-term blackman harris
+	//Use 7-term blackman harris as the window
 	float a0 = 0.27105140069342f;
 	float a1 = 0.43329793923448f;
 	float a2 = 0.21812299954311f;
@@ -86,6 +89,8 @@ HRESULT CStereoFFT::Initialize(const STEREO_FFT_DESC& Desc) {
 }
 
 VOID CStereoFFT::Post(PFLOAT Buffer, UINT BufferFrames) {
+	//Move old data to the beginning of the buffer,
+	//add new data to the end of the buffer
 	INT NumOld = max(0, m_NumSamples - BufferFrames);
 	INT NumNew = min(m_NumSamples, BufferFrames);
 	
@@ -99,11 +104,13 @@ VOID CStereoFFT::Post(PFLOAT Buffer, UINT BufferFrames) {
 }
 
 VOID CStereoFFT::Process() {
+	//Generate all mixes
 	GenerateLeft();
 	GenerateRight();
 	GenerateMid();
 	GenerateSide();
 
+	//Process all mixes
 	ProcessMix(m_LeftMix, m_LeftTransform, m_LeftDC);
 	ProcessMix(m_RightMix, m_RightTransform, m_RightDC);
 	ProcessMix(m_MidMix, m_MidTransform, m_MidDC);
@@ -111,18 +118,21 @@ VOID CStereoFFT::Process() {
 }
 
 VOID CStereoFFT::GenerateLeft() {
+	//Grab the left channel
 	for (UINT n = 0; n < m_NumSamples; n++) {
 		m_LeftMix[n] = m_HistoryBuffer[n * 2];
 	}
 }
 
 VOID CStereoFFT::GenerateRight() {
+	//Grab the right channel
 	for (UINT n = 0; n < m_NumSamples; n++) {
 		m_RightMix[n] = m_HistoryBuffer[n * 2 + 1];
 	}
 }
 
 VOID CStereoFFT::GenerateMid() {
+	//Generate the mid by averaging the two channels
 	for (UINT n = 0; n < m_NumSamples; n++) {
 		m_MidMix[n] = m_HistoryBuffer[n * 2];
 		m_MidMix[n] += m_HistoryBuffer[n * 2 + 1];
@@ -131,6 +141,7 @@ VOID CStereoFFT::GenerateMid() {
 }
 
 VOID CStereoFFT::GenerateSide() {
+	//Generate the side by comparing the two channels
 	for (UINT n = 0; n < m_NumSamples; n++) {
 		m_SideMix[n] = m_HistoryBuffer[n * 2];
 		m_SideMix[n] -= m_HistoryBuffer[n * 2 + 1];
@@ -139,15 +150,19 @@ VOID CStereoFFT::GenerateSide() {
 }
 
 VOID CStereoFFT::ProcessMix(PFLOAT Mix, PFLOAT Transform, FLOAT& DC) {
+	//Multiply mix and window, add to process buffer
 	for (UINT n = 0; n < m_NumSamples; n++) {
 		m_ProcessBuffer[n] = Mix[n];
 		m_ProcessBuffer[n] *= m_Window[n];
 	}
 
+	//Execute the fft
 	fftwf_execute(m_Plan);
 
+	//Calculate the DC offset power from index 0
 	DC = pow(m_ComplexBuffer[0][0], 2) + pow(m_ComplexBuffer[0][1], 2);
 
+	//Calculate the rest of the FFT powers
 	for (UINT n = 0; n < m_NumSamples / 2; n++) {
 		Transform[n] = pow(m_ComplexBuffer[n + 1][0], 2) + pow(m_ComplexBuffer[n + 1][1], 2);
 	}
