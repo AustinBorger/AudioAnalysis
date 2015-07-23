@@ -6,6 +6,7 @@
 #pragma comment(lib, "StereoFFT.lib")
 #pragma comment(lib, "d3d11.lib")
 
+//int main() {
 int APIENTRY wWinMain(HINSTANCE, HINSTANCE, LPWSTR, int) {
 	App app;
 

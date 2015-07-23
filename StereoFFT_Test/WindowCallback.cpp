@@ -1,6 +1,9 @@
 #include "WindowCallback.h"
 #include <string>
 
+#include "FullscreenTriangleVS.h"
+#include "PixelShader.h"
+
 #define FILENAME L"WindowCallback.cpp"
 #define HANDLE_HR(Line) if (FAILED(hr)) OnObjectFailure(FILENAME, Line, hr)
 
@@ -18,6 +21,41 @@ VOID WindowCallback::OnObjectFailure(LPCWSTR File, UINT Line, HRESULT hr) {
 	ExitProcess(hr);
 }
 
+VOID WindowCallback::OnBackBufferCreate(IDXWindow* pWindow) {
+	HRESULT hr = S_OK;
+	CComPtr<ID3D11Texture2D> Texture;
+
+	pWindow->GetBackBuffer(IID_PPV_ARGS(&Texture));
+
+	hr = m_Device->CreateRenderTargetView (
+		Texture,
+		nullptr,
+		&m_RenderTargetView
+	); HANDLE_HR(__LINE__);
+
+	D3D11_VIEWPORT Viewport;
+	D3D11_TEXTURE2D_DESC TextureDesc;
+
+	Texture->GetDesc(&TextureDesc);
+
+	Viewport.TopLeftX = 0.0f;
+	Viewport.TopLeftY = 0.0f;
+	Viewport.MinDepth = 0.0f;
+	Viewport.MaxDepth = 0.0f;
+	
+	Viewport.Width = FLOAT(TextureDesc.Width);
+	Viewport.Height = FLOAT(TextureDesc.Height);
+
+	ID3D11RenderTargetView* rtv = m_RenderTargetView;
+
+	m_DeviceContext->RSSetViewports(1, &Viewport);
+	m_DeviceContext->OMSetRenderTargets(1, &rtv, nullptr);
+}
+
+VOID WindowCallback::OnBackBufferRelease(IDXWindow* pWindow) {
+	m_RenderTargetView.Release();
+}
+
 VOID WindowCallback::CreateDevice() {
 	HRESULT hr = S_OK;
 
@@ -33,8 +71,85 @@ VOID WindowCallback::CreateDevice() {
 		nullptr,
 		&m_DeviceContext
 	); HANDLE_HR(__LINE__);
+
+	hr = m_Device->CreateVertexShader (
+		FullscreenTriangleVS,
+		sizeof(FullscreenTriangleVS),
+		nullptr,
+		&m_VertexShader
+	); HANDLE_HR(__LINE__);
+
+	hr = m_Device->CreatePixelShader (
+		PixelShader,
+		sizeof(PixelShader),
+		nullptr,
+		&m_PixelShader
+	); HANDLE_HR(__LINE__);
+
+	D3D11_BUFFER_DESC BufferDesc;
+	BufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	BufferDesc.ByteWidth = sizeof(FLOAT) * 512;
+	BufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	BufferDesc.MiscFlags = NULL;
+	BufferDesc.StructureByteStride = 0;
+	BufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+
+	hr = m_Device->CreateBuffer (
+		&BufferDesc,
+		nullptr,
+		&m_TransformBuffer
+	); HANDLE_HR(__LINE__);
+
+	STEREO_FFT_DESC TransformDesc;
+	TransformDesc.SampleRate = 44100;
+	TransformDesc.NumSamples = 1024;
+
+	hr = CreateStereoFFT(&TransformDesc, &m_StereoFFT);
+	HANDLE_HR(__LINE__);
+
+	QueryPerformanceFrequency(&liFrequency);
+	QueryPerformanceCounter(&liOld);
 }
 
-VOID WindowCallback::Render() {
+#include <iostream>
 
+VOID WindowCallback::Render() {
+	HRESULT hr = S_OK;
+
+	FLOAT ClearColor[] = {
+		1.0f, 1.0f, 1.0f, 1.0f
+	};
+
+	m_DeviceContext->ClearRenderTargetView(m_RenderTargetView, ClearColor);
+
+	LARGE_INTEGER liNew;
+	QueryPerformanceCounter(&liNew);
+
+	double dt = double(liNew.QuadPart - liOld.QuadPart) / double(liFrequency.QuadPart);
+	liOld = liNew;
+
+	m_SamplesNeeded += dt * 44100.0;
+	UINT nSamplesNeeded = UINT(m_SamplesNeeded);
+	m_SamplesNeeded -= nSamplesNeeded;
+	nSamplesNeeded = min(1024, nSamplesNeeded);
+
+	FLOAT l_Buffer[2048];
+	m_StreamCallback.Read(l_Buffer, nSamplesNeeded);
+
+	m_StereoFFT->Post(l_Buffer, nSamplesNeeded);
+	m_StereoFFT->Process();
+
+	D3D11_MAPPED_SUBRESOURCE Sub;
+
+	hr = m_DeviceContext->Map(m_TransformBuffer, 0, D3D11_MAP_WRITE_DISCARD, NULL, &Sub); HANDLE_HR(__LINE__);
+	memcpy(Sub.pData, m_StereoFFT->GetMidTransform(), sizeof(FLOAT) * 512);
+	m_DeviceContext->Unmap(m_TransformBuffer, 0);
+
+	ID3D11Buffer* TransformBuffer = m_TransformBuffer;
+
+	m_DeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	m_DeviceContext->VSSetShader(m_VertexShader, nullptr, 0);
+	m_DeviceContext->PSSetConstantBuffers(0, 1, &TransformBuffer);
+	m_DeviceContext->PSSetShader(m_PixelShader, nullptr, 0);
+	m_DeviceContext->Draw(3, 0);
 }

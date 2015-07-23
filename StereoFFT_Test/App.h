@@ -12,12 +12,13 @@
 
 class App {
 public:
+	App();
+
 	int Run();
 
 private:
-	CComPtr<IDXWindow> m_Window;
-	CComPtr<IDXAudioStream> m_Stream;
-
 	WindowCallback m_WindowCallback;
 	StreamCallback m_StreamCallback;
+	CComPtr<IDXWindow> m_Window;
+	CComPtr<IDXAudioStream> m_Stream;
 };

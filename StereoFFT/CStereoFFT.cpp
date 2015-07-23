@@ -83,8 +83,13 @@ VOID CStereoFFT::Post(PFLOAT Buffer, UINT BufferFrames) {
 	INT NumOld = max(0, m_NumSamples - BufferFrames);
 	INT NumNew = min(m_NumSamples, BufferFrames);
 	
-	memcpy(m_HistoryBuffer, m_HistoryBuffer + NumNew * 2, NumOld * 2 * sizeof(FLOAT));
-	memcpy(m_HistoryBuffer + NumOld * 2, Buffer, NumNew * 2 * sizeof(FLOAT));
+	if (NumOld > 0) {
+		memcpy(m_HistoryBuffer, m_HistoryBuffer + NumNew * 2, NumOld * 2 * sizeof(FLOAT));
+	}
+
+	if (NumNew > 0) {
+		memcpy(m_HistoryBuffer + NumOld * 2, Buffer, NumNew * 2 * sizeof(FLOAT));
+	}
 }
 
 VOID CStereoFFT::Process() {
@@ -128,7 +133,9 @@ VOID CStereoFFT::GenerateSide() {
 }
 
 VOID CStereoFFT::ProcessMix(PFLOAT Mix, PFLOAT Transform, FLOAT& DC) {
-	memcpy(m_ProcessBuffer, Mix, m_NumSamples * sizeof(FLOAT));
+	for (UINT n = 0; n < m_NumSamples; n++) {
+		m_ProcessBuffer[n] = m_Window[n] * Mix[n];
+	}
 
 	fftwf_execute(m_Plan);
 

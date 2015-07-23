@@ -3,6 +3,10 @@
 #define FILENAME L"App.cpp"
 #define HANDLE_HR(Line) if(FAILED(hr)) m_WindowCallback.OnObjectFailure(FILENAME, Line, hr)
 
+App::App() :
+m_WindowCallback(m_StreamCallback)
+{ }
+
 int App::Run() {
 	HRESULT hr = S_OK;
 	DXWINDOW_DESC WindowDesc;
@@ -17,7 +21,7 @@ int App::Run() {
 	WindowDesc.Instance = GetModuleHandleW(NULL);
 	WindowDesc.Title = L"AudioAnalysisTest";
 	WindowDesc.Width = 1280;
-	WindowDesc.WindowState = DXWINDOW_WINDOW_STATE_WINDOWED;
+	WindowDesc.WindowState = DXWINDOW_WINDOW_STATE_BORDERLESS;
 
 	m_WindowCallback.CreateDevice();
 
@@ -31,7 +35,7 @@ int App::Run() {
 	DXAUDIO_STREAM_DESC StreamDesc;
 
 	StreamDesc.SampleRate = 44100.0f;
-	StreamDesc.Type = DXAUDIO_STREAM_TYPE_OUTPUT;
+	StreamDesc.Type = DXAUDIO_STREAM_TYPE_LOOPBACK;
 
 	hr = DXAudioCreateStream (
 		&StreamDesc,
