@@ -2,7 +2,9 @@
 #include <string>
 
 #include "FullscreenTriangleVS.h"
-#include "PixelShader.h"
+#include "MaximaPS.h"
+#include "AllPS.h"
+#include "LeftRightAllPS.h"
 
 #define FILENAME L"WindowCallback.cpp"
 #define HANDLE_HR(Line) if (FAILED(hr)) OnObjectFailure(FILENAME, Line, hr)
@@ -80,10 +82,24 @@ VOID WindowCallback::CreateDevice() {
 	); HANDLE_HR(__LINE__);
 
 	hr = m_Device->CreatePixelShader (
-		PixelShader,
-		sizeof(PixelShader),
+		AllPS,
+		sizeof(AllPS),
 		nullptr,
-		&m_PixelShader
+		&m_AllShader
+	); HANDLE_HR(__LINE__);
+
+	hr = m_Device->CreatePixelShader (
+		MaximaPS,
+		sizeof(MaximaPS),
+		nullptr,
+		&m_MaximaShader
+	); HANDLE_HR(__LINE__);
+
+	hr = m_Device->CreatePixelShader (
+		LeftRightAllPS,
+		sizeof(LeftRightAllPS),
+		nullptr,
+		&m_LeftRightAll
 	); HANDLE_HR(__LINE__);
 
 	D3D11_BUFFER_DESC BufferDesc;
@@ -100,6 +116,22 @@ VOID WindowCallback::CreateDevice() {
 		&m_TransformBuffer
 	); HANDLE_HR(__LINE__);
 
+	BufferDesc.ByteWidth = sizeof(FLOAT) * 512 * 2;
+
+	hr = m_Device->CreateBuffer (
+		&BufferDesc,
+		nullptr,
+		&m_DoubleTransformBuffer
+	); HANDLE_HR(__LINE__);
+
+	BufferDesc.ByteWidth = sizeof(FLOAT) * 8;
+
+	hr = m_Device->CreateBuffer (
+		&BufferDesc,
+		nullptr,
+		&m_TimeBuffer
+	); HANDLE_HR(__LINE__);
+
 	STEREO_FFT_DESC TransformDesc;
 	TransformDesc.NumSamples = 1024;
 
@@ -108,6 +140,18 @@ VOID WindowCallback::CreateDevice() {
 
 	QueryPerformanceFrequency(&liFrequency);
 	QueryPerformanceCounter(&liOld);
+
+	ID3D11Buffer* Buffers[] = {
+		m_TransformBuffer,
+		m_TimeBuffer
+	};
+
+	m_DeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	m_DeviceContext->VSSetShader(m_VertexShader, nullptr, 0);
+	m_DeviceContext->PSSetConstantBuffers(0, 2, Buffers);
+	m_DeviceContext->PSSetShader(m_AllShader, nullptr, 0);
+
+	m_ShaderType = SHADER_TYPE_MID;
 }
 
 VOID WindowCallback::Render() {
@@ -122,6 +166,7 @@ VOID WindowCallback::Render() {
 	LARGE_INTEGER liNew;
 	QueryPerformanceCounter(&liNew);
 
+	double time = double(liNew.QuadPart) / double(liFrequency.QuadPart);
 	double dt = double(liNew.QuadPart - liOld.QuadPart) / double(liFrequency.QuadPart);
 	liOld = liNew;
 
@@ -138,15 +183,43 @@ VOID WindowCallback::Render() {
 
 	D3D11_MAPPED_SUBRESOURCE Sub;
 
-	hr = m_DeviceContext->Map(m_TransformBuffer, 0, D3D11_MAP_WRITE_DISCARD, NULL, &Sub); HANDLE_HR(__LINE__);
-	memcpy(Sub.pData, m_StereoFFT->GetMidTransform(), sizeof(FLOAT) * 512);
-	m_DeviceContext->Unmap(m_TransformBuffer, 0);
+	if (m_ShaderType == SHADER_TYPE_MID) {
+		hr = m_DeviceContext->Map(m_TransformBuffer, 0, D3D11_MAP_WRITE_DISCARD, NULL, &Sub); HANDLE_HR(__LINE__);
+		memcpy(Sub.pData, m_StereoFFT->GetMidTransform(), sizeof(FLOAT) * 512);
+		m_DeviceContext->Unmap(m_TransformBuffer, 0);
+	} else if (m_ShaderType == SHADER_TYPE_LEFTRIGHT) {
+		hr = m_DeviceContext->Map(m_DoubleTransformBuffer, 0, D3D11_MAP_WRITE_DISCARD, NULL, &Sub); HANDLE_HR(__LINE__);
+		memcpy(Sub.pData, m_StereoFFT->GetLeftTransform(), sizeof(FLOAT) * 512);
+		memcpy((BYTE*)Sub.pData + sizeof(FLOAT) * 512, m_StereoFFT->GetRightTransform(), sizeof(FLOAT) * 512);
+		m_DeviceContext->Unmap(m_DoubleTransformBuffer, 0);
+	}
 
-	ID3D11Buffer* TransformBuffer = m_TransformBuffer;
+	hr = m_DeviceContext->Map(m_TimeBuffer, 0, D3D11_MAP_WRITE_DISCARD, NULL, &Sub); HANDLE_HR(__LINE__);
+	*((FLOAT*)(Sub.pData)) = FLOAT(time);
+	m_DeviceContext->Unmap(m_TimeBuffer, 0);
 
-	m_DeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	m_DeviceContext->VSSetShader(m_VertexShader, nullptr, 0);
-	m_DeviceContext->PSSetConstantBuffers(0, 1, &TransformBuffer);
-	m_DeviceContext->PSSetShader(m_PixelShader, nullptr, 0);
 	m_DeviceContext->Draw(3, 0);
+}
+
+VOID WindowCallback::OnKeyDown(IDXWindow* pWindow, WPARAM Key, LPARAM Flags) {
+	ID3D11Buffer* Buffers[] = {
+		nullptr,
+		m_TimeBuffer
+	};
+
+	if (Key == VK_F1) {
+		m_DeviceContext->PSSetShader(m_AllShader, nullptr, 0);
+		Buffers[0] = m_TransformBuffer;
+		m_ShaderType = SHADER_TYPE_MID;
+	} else if (Key == VK_F2) {
+		m_DeviceContext->PSSetShader(m_MaximaShader, nullptr, 0);
+		Buffers[0] = m_TransformBuffer;
+		m_ShaderType = SHADER_TYPE_MID;
+	} else if (Key == VK_F3) {
+		m_DeviceContext->PSSetShader(m_LeftRightAll, nullptr, 0);
+		Buffers[0] = m_DoubleTransformBuffer;
+		m_ShaderType = SHADER_TYPE_LEFTRIGHT;
+	}
+
+	m_DeviceContext->PSSetConstantBuffers(0, 2, Buffers);
 }

@@ -1,10 +1,6 @@
-﻿Build started 7/23/2015 12:25:34 AM.
+﻿Build started 7/25/2015 5:17:25 PM.
      1>Project "C:\Users\Austin\Documents\COM Objects\StereoFFT\StereoFFT_Test\StereoFFT_Test.vcxproj" on node 2 (Build target(s)).
-     1>FxCompile:
-         C:\Program Files (x86)\Windows Kits\8.1\bin\x86\fxc.exe /nologo /E"main" /T ps_5_0 /Fh "PixelShader.h" /Fo "C:\Users\Austin\Documents\COM Objects\StereoFFT\Release\PixelShader.cso" /Vn "PixelShader" PixelShader.hlsl 
-         compilation header save succeeded; see C:\Users\Austin\Documents\COM Objects\StereoFFT\StereoFFT_Test\PixelShader.h
-         compilation object save succeeded; see C:\Users\Austin\Documents\COM Objects\StereoFFT\Release\PixelShader.cso
-       ClCompile:
+     1>ClCompile:
          C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /I../Include/ /I../StereoFFT/ /Zi /nologo /W3 /WX- /sdl /O2 /Oi /Oy- /GL /D _UNICODE /D UNICODE /Gm- /EHsc /MD /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Release\\" /Fd"Release\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt WindowCallback.cpp
          WindowCallback.cpp
        Link:
@@ -19,4 +15,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:01.92
+Time Elapsed 00:00:01.74

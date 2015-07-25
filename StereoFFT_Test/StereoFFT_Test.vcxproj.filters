@@ -11,10 +11,11 @@
     <ClInclude Include="StreamCallback.h" />
     <ClInclude Include="WindowCallback.h" />
     <ClInclude Include="FullscreenTriangleVS.h" />
-    <ClInclude Include="PixelShader.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="FullscreenTriangle.hlsl" />
-    <FxCompile Include="PixelShader.hlsl" />
+    <FxCompile Include="Maxima.hlsl" />
+    <FxCompile Include="AllShader.hlsl" />
+    <FxCompile Include="LeftRightShader.hlsl" />
   </ItemGroup>
 </Project>

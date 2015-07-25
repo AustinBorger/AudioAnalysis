@@ -39,11 +39,19 @@ public:
 
 	VOID STDMETHODCALLTYPE OnBackBufferRelease(IDXWindow* pWindow) final;
 
+	VOID STDMETHODCALLTYPE OnKeyDown(IDXWindow* pWindow, WPARAM Key, LPARAM Flags) final;
+
 	VOID CreateDevice();
 
 	VOID Render();
 
 	bool run;
+
+	enum SHADER_TYPE {
+		SHADER_TYPE_MID,
+		SHADER_TYPE_LEFTRIGHT,
+		SHADER_TYPE_SIDE
+	} m_ShaderType;
 
 	CComPtr<IStereoFFT> m_StereoFFT;
 
@@ -52,8 +60,14 @@ public:
 	CComPtr<ID3D11DeviceContext> m_DeviceContext;
 	CComPtr<ID3D11RenderTargetView> m_RenderTargetView;
 	CComPtr<ID3D11VertexShader> m_VertexShader;
-	CComPtr<ID3D11PixelShader> m_PixelShader;
+	CComPtr<ID3D11Buffer> m_TimeBuffer;
+
 	CComPtr<ID3D11Buffer> m_TransformBuffer;
+	CComPtr<ID3D11Buffer> m_DoubleTransformBuffer;
+
+	CComPtr<ID3D11PixelShader> m_MaximaShader;
+	CComPtr<ID3D11PixelShader> m_AllShader;
+	CComPtr<ID3D11PixelShader> m_LeftRightAll;
 
 	LARGE_INTEGER liFrequency;
 	LARGE_INTEGER liOld;
