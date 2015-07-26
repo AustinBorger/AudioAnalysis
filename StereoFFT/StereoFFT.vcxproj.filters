@@ -3,9 +3,11 @@
   <ItemGroup>
     <ClCompile Include="CStereoFFT.cpp" />
     <ClCompile Include="StereoFFT.cpp" />
+    <ClCompile Include="WindowFunction.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CStereoFFT.h" />
     <ClInclude Include="StereoFFT.h" />
+    <ClInclude Include="WindowFunction.h" />
   </ItemGroup>
 </Project>

@@ -164,6 +164,7 @@ VOID WindowCallback::CreateDevice() {
 
 	STEREO_FFT_DESC TransformDesc;
 	TransformDesc.NumSamples = 1024;
+	TransformDesc.WindowFunction = STEREO_FFT_WINDOW_FUNCTION_BLACKMAN_NUTTALL;
 
 	hr = CreateStereoFFT(&TransformDesc, &m_StereoFFT);
 	HANDLE_HR(__LINE__);
@@ -222,6 +223,10 @@ VOID WindowCallback::Render() {
 		memcpy(Sub.pData, m_StereoFFT->GetLeftTransform(), sizeof(FLOAT) * 512);
 		memcpy((BYTE*)Sub.pData + sizeof(FLOAT) * 512, m_StereoFFT->GetRightTransform(), sizeof(FLOAT) * 512);
 		m_DeviceContext->Unmap(m_DoubleTransformBuffer, 0);
+	} else if (m_ShaderType == SHADER_TYPE_SIDE) {
+		hr = m_DeviceContext->Map(m_TransformBuffer, 0, D3D11_MAP_WRITE_DISCARD, NULL, &Sub); HANDLE_HR(__LINE__);
+		memcpy(Sub.pData, m_StereoFFT->GetSideTransform(), sizeof(FLOAT) * 512);
+		m_DeviceContext->Unmap(m_TransformBuffer, 0);
 	}
 
 	hr = m_DeviceContext->Map(m_TimeBuffer, 0, D3D11_MAP_WRITE_DISCARD, NULL, &Sub); HANDLE_HR(__LINE__);
@@ -256,6 +261,16 @@ VOID WindowCallback::OnKeyDown(IDXWindow* pWindow, WPARAM Key, LPARAM Flags) {
 		m_DeviceContext->PSSetShader(m_LeftRightMaxima, nullptr, 0);
 		Buffers[0] = m_DoubleTransformBuffer;
 		m_ShaderType = SHADER_TYPE_LEFTRIGHT;
+		m_DeviceContext->PSSetConstantBuffers(0, 2, Buffers);
+	} else if (Key == VK_F5) {
+		m_DeviceContext->PSSetShader(m_AllShader, nullptr, 0);
+		Buffers[0] = m_TransformBuffer;
+		m_ShaderType = SHADER_TYPE_SIDE;
+		m_DeviceContext->PSSetConstantBuffers(0, 2, Buffers);
+	} else if (Key == VK_F6) {
+		m_DeviceContext->PSSetShader(m_MaximaShader, nullptr, 0);
+		Buffers[0] = m_TransformBuffer;
+		m_ShaderType = SHADER_TYPE_SIDE;
 		m_DeviceContext->PSSetConstantBuffers(0, 2, Buffers);
 	}
 }
