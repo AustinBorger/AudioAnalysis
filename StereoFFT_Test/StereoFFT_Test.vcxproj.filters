@@ -24,6 +24,9 @@
     <FxCompile Include="Maxima.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
+    <FxCompile Include="LeftRightMaxima.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Shaders">

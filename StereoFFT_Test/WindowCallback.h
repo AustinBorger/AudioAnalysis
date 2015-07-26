@@ -90,6 +90,7 @@ public:
 	CComPtr<ID3D11PixelShader> m_MaximaShader;
 	CComPtr<ID3D11PixelShader> m_AllShader;
 	CComPtr<ID3D11PixelShader> m_LeftRightAll;
+	CComPtr<ID3D11PixelShader> m_LeftRightMaxima;
 
 	LARGE_INTEGER liFrequency;
 	LARGE_INTEGER liOld;

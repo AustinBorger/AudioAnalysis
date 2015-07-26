@@ -1,6 +1,10 @@
-﻿Build started 7/25/2015 8:46:20 PM.
+﻿Build started 7/25/2015 9:14:40 PM.
      1>Project "C:\Users\Austin\Documents\COM Objects\StereoFFT\StereoFFT_Test\StereoFFT_Test.vcxproj" on node 2 (Build target(s)).
-     1>ClCompile:
+     1>FxCompile:
+         C:\Program Files (x86)\Windows Kits\8.1\bin\x86\fxc.exe /nologo /E"main" /T ps_5_0 /Fh "LeftRightMaximaPS.h" /Fo "C:\Users\Austin\Documents\COM Objects\StereoFFT\Release\LeftRightMaxima.cso" /Vn "LeftRightMaximaPS" LeftRightMaxima.hlsl 
+         compilation header save succeeded; see C:\Users\Austin\Documents\COM Objects\StereoFFT\StereoFFT_Test\LeftRightMaximaPS.h
+         compilation object save succeeded; see C:\Users\Austin\Documents\COM Objects\StereoFFT\Release\LeftRightMaxima.cso
+       ClCompile:
          C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /I../Include/ /I../StereoFFT/ /Zi /nologo /W3 /WX- /sdl /O2 /Oi /Oy- /GL /D _UNICODE /D UNICODE /Gm- /EHsc /MD /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Release\\" /Fd"Release\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt WindowCallback.cpp
          WindowCallback.cpp
        Link:
@@ -15,4 +19,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:01.73
+Time Elapsed 00:00:02.16

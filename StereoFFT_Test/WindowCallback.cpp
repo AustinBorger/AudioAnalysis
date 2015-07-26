@@ -27,6 +27,7 @@
 #include "MaximaPS.h"
 #include "AllPS.h"
 #include "LeftRightAllPS.h"
+#include "LeftRightMaximaPS.h"
 
 #define FILENAME L"WindowCallback.cpp"
 #define HANDLE_HR(Line) if (FAILED(hr)) OnObjectFailure(FILENAME, Line, hr)
@@ -122,6 +123,13 @@ VOID WindowCallback::CreateDevice() {
 		sizeof(LeftRightAllPS),
 		nullptr,
 		&m_LeftRightAll
+	); HANDLE_HR(__LINE__);
+
+	hr = m_Device->CreatePixelShader (
+		LeftRightMaximaPS,
+		sizeof(LeftRightMaximaPS),
+		nullptr,
+		&m_LeftRightMaxima
 	); HANDLE_HR(__LINE__);
 
 	D3D11_BUFFER_DESC BufferDesc;
@@ -241,6 +249,11 @@ VOID WindowCallback::OnKeyDown(IDXWindow* pWindow, WPARAM Key, LPARAM Flags) {
 		m_DeviceContext->PSSetConstantBuffers(0, 2, Buffers);
 	} else if (Key == VK_F3) {
 		m_DeviceContext->PSSetShader(m_LeftRightAll, nullptr, 0);
+		Buffers[0] = m_DoubleTransformBuffer;
+		m_ShaderType = SHADER_TYPE_LEFTRIGHT;
+		m_DeviceContext->PSSetConstantBuffers(0, 2, Buffers);
+	} else if (Key == VK_F4) {
+		m_DeviceContext->PSSetShader(m_LeftRightMaxima, nullptr, 0);
 		Buffers[0] = m_DoubleTransformBuffer;
 		m_ShaderType = SHADER_TYPE_LEFTRIGHT;
 		m_DeviceContext->PSSetConstantBuffers(0, 2, Buffers);
