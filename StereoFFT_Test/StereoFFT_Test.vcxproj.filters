@@ -10,12 +10,24 @@
     <ClInclude Include="App.h" />
     <ClInclude Include="StreamCallback.h" />
     <ClInclude Include="WindowCallback.h" />
-    <ClInclude Include="FullscreenTriangleVS.h" />
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="FullscreenTriangle.hlsl" />
-    <FxCompile Include="Maxima.hlsl" />
-    <FxCompile Include="AllShader.hlsl" />
-    <FxCompile Include="LeftRightShader.hlsl" />
+    <FxCompile Include="AllShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="FullscreenTriangle.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="LeftRightShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Maxima.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Shaders">
+      <UniqueIdentifier>{d5bc8f97-1ac4-44e2-867d-b9495bbc09ef}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
 </Project>

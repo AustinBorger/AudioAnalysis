@@ -36,7 +36,7 @@ cbuffer Time : register(b1) {
 float4 main(VSOut input) : SV_Target{
 	float2 uv = input.uv; //uv coordinates of the pixel
 
-	uint leftPos = 512 - (log2(1.0f + uv.y * 512) / log2(512) * 512);
+	uint leftPos = pow(2, (1.0 - uv.y) * log2(512)) - 1;
 	uint rightPos = leftPos + 512;
 
 	float leftElement = buf[leftPos >> 2][leftPos & 3]; //grabs the power of the bin, which needs to be unpacked from float4

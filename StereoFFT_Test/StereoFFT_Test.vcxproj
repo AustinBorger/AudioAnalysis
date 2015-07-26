@@ -75,7 +75,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.h" />
-    <ClInclude Include="FullscreenTriangleVS.h" />
     <ClInclude Include="StreamCallback.h" />
     <ClInclude Include="WindowCallback.h" />
   </ItemGroup>

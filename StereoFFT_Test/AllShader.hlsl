@@ -31,7 +31,8 @@ cbuffer Transform : register(b0) {
 
 float4 main(VSOut input) : SV_Target{
 	float2 uv = input.uv; //uv coordinates of the pixel
-	uint uPos = 512 - (log2(1.0f + (1.0 - uv.x) * 512) / log2(512) * 512);
+
+	uint uPos = pow(2, uv.x * log2(512)) - 1; //bin pos in array
 
 	float element = buf[uPos >> 2][uPos & 3]; //grabs the power of the bin, which needs to be unpacked from float4
 

@@ -233,15 +233,16 @@ VOID WindowCallback::OnKeyDown(IDXWindow* pWindow, WPARAM Key, LPARAM Flags) {
 		m_DeviceContext->PSSetShader(m_AllShader, nullptr, 0);
 		Buffers[0] = m_TransformBuffer;
 		m_ShaderType = SHADER_TYPE_MID;
+		m_DeviceContext->PSSetConstantBuffers(0, 2, Buffers);
 	} else if (Key == VK_F2) {
 		m_DeviceContext->PSSetShader(m_MaximaShader, nullptr, 0);
 		Buffers[0] = m_TransformBuffer;
 		m_ShaderType = SHADER_TYPE_MID;
+		m_DeviceContext->PSSetConstantBuffers(0, 2, Buffers);
 	} else if (Key == VK_F3) {
 		m_DeviceContext->PSSetShader(m_LeftRightAll, nullptr, 0);
 		Buffers[0] = m_DoubleTransformBuffer;
 		m_ShaderType = SHADER_TYPE_LEFTRIGHT;
+		m_DeviceContext->PSSetConstantBuffers(0, 2, Buffers);
 	}
-
-	m_DeviceContext->PSSetConstantBuffers(0, 2, Buffers);
 }
