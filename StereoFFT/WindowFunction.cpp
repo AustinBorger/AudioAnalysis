@@ -38,6 +38,7 @@ VOID Cosine(PFLOAT W, UINT N);
 VOID Gaussian(PFLOAT W, UINT N);
 VOID ConfinedGaussian(PFLOAT W, UINT N);
 VOID Tukey(PFLOAT W, UINT N);
+VOID PlanckTaper(PFLOAT W, UINT N);
 VOID DolphChebyshev(PFLOAT W, UINT N);
 
 VOID WindowFunction(STEREO_FFT_WINDOW_FUNCTION Function, PFLOAT Buffer, UINT N) {
@@ -70,6 +71,8 @@ VOID WindowFunction(STEREO_FFT_WINDOW_FUNCTION Function, PFLOAT Buffer, UINT N) 
 		return ConfinedGaussian(Buffer, N);
 	case STEREO_FFT_WINDOW_FUNCTION_TUKEY:
 		return Tukey(Buffer, N);
+	case STEREO_FFT_WINDOW_FUNCTION_PLANCK_TAPER:
+		return PlanckTaper(Buffer, N);
 	case STEREO_FFT_WINDOW_FUNCTION_DOLPH_CHEBYSHEV:
 		return DolphChebyshev(Buffer, N);
 	default:
@@ -241,6 +244,25 @@ VOID Tukey(PFLOAT W, UINT N) {
 			W[n] = 1.0f;
 		} else {
 			W[n] = 0.5f * (1.0f + cos(float(M_PI) * (2.0f * float(n) / (a * L) - (2.0f / a) + 1.0f)));
+		}
+	}
+}
+
+VOID PlanckTaper(PFLOAT W, UINT N) {
+	float E = 0.1f;
+	float L = float(N - 1);
+
+	static const auto Z = [&](float n, float sign) {
+		return 2.0f * E * ((1.0f / (1.0f + sign * 2.0f * n / L)) + (1.0f / (1.0f - 2.0f * E + sign * 2.0f * n / L)));
+	};
+
+	for (UINT n = 0; n < N; n++) {
+		if (n <= E * L) {
+			W[n] = 1.0f / (exp(Z(float(n), 1.0f)) + 1.0f);
+		} else if (n < (1.0f - E) * L) {
+			W[n] = 1.0f;
+		} else {
+			W[n] = 1.0f / (exp(Z(float(N), -1.0f)) + 1.0f);
 		}
 	}
 }

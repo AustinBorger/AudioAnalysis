@@ -1,9 +1,7 @@
-﻿Build started 7/27/2015 3:41:21 PM.
+﻿Build started 7/27/2015 3:57:08 PM.
      1>Project "C:\Users\Austin\Documents\COM Objects\StereoFFT\StereoFFT\StereoFFT.vcxproj" on node 2 (Build target(s)).
      1>ClCompile:
-         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /I../Include/ /Zi /nologo /W3 /WX- /sdl /O2 /Oi /Oy- /GL /D _STEREO_FFT_DLL_PROJECT /D _WINDLL /D _UNICODE /D UNICODE /Gm- /EHsc /MD /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Release\\" /Fd"Release\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt CStereoFFT.cpp StereoFFT.cpp WindowFunction.cpp
-         CStereoFFT.cpp
-         StereoFFT.cpp
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /I../Include/ /Zi /nologo /W3 /WX- /sdl /O2 /Oi /Oy- /GL /D _STEREO_FFT_DLL_PROJECT /D _WINDLL /D _UNICODE /D UNICODE /Gm- /EHsc /MD /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Release\\" /Fd"Release\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt WindowFunction.cpp
          WindowFunction.cpp
        Link:
          C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\Austin\Documents\COM Objects\StereoFFT\Release\StereoFFT.dll" /NOLOGO /LIBPATH:../Lib/Release/ kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:\Users\Austin\Documents\COM Objects\StereoFFT\Release\StereoFFT.pdb" /OPT:REF /OPT:ICF /LTCG /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\Austin\Documents\COM Objects\StereoFFT\Release\StereoFFT.lib" /MACHINE:X86 /SAFESEH /DLL Release\CStereoFFT.obj
@@ -17,4 +15,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:12.00
+Time Elapsed 00:00:10.92
