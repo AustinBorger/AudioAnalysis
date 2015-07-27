@@ -36,7 +36,7 @@ float4 main(VSOut input) : SV_Target{
 
 	float element = buf[uPos >> 2][uPos & 3]; //grabs the power of the bin, which needs to be unpacked from float4
 
-	float db = log10(1.0f + element * 10000) / 10.0f; //convert to a cb scale
+	float db = 10.0f * log10(1.0f + element) / 50.0f; //convert to a db scale
 	float z = 0.001; //Choose how smoothly to interpolate
 	float interp = smoothstep(db, db + z, 1.0 - uv.y); //interpolate between bin pixel and background pixel
 

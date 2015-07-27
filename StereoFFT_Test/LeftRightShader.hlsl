@@ -42,8 +42,8 @@ float4 main(VSOut input) : SV_Target{
 	float leftElement = buf[leftPos >> 2][leftPos & 3]; //grabs the power of the bin, which needs to be unpacked from float4
 	float rightElement = buf[rightPos >> 2][rightPos & 3]; //does the same for the right channel
 
-	float leftDB = log10(1.0f + leftElement * 10000) / 20.0f; //convert to a cb scale
-	float rightDB = log10(1.0f + rightElement * 10000) / 20.0f; //same for right
+	float leftDB = 10.0f * log10(1.0f + leftElement) / 100.0f; //convert to a db scale
+	float rightDB = 10.0f * log10(1.0f + rightElement) / 100.0f; //same for right
 
 	float z = 0.001; //Choose how smoothly to interpolate
 

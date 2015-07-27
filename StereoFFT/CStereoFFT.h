@@ -63,6 +63,14 @@ public:
 	/* Processes all FFTs */
 	VOID STDMETHODCALLTYPE Process() final;
 
+	/* Sets the window function used by the FFT. */
+	VOID STDMETHODCALLTYPE SetWindowFunction(STEREO_FFT_WINDOW_FUNCTION WindowFunction) final;
+
+	/* Returns the window function currently being used by the FFT. */
+	STEREO_FFT_WINDOW_FUNCTION STDMETHODCALLTYPE GetWindowFunction() final {
+		return m_WindowFunction;
+	}
+
 	/* Returns the number of samples in the history buffer */
 	UINT STDMETHODCALLTYPE GetNumSamples() final {
 		return m_NumSamples;
@@ -170,6 +178,8 @@ private:
 	FLOAT m_RightDC; //DC offset of the right channel
 	FLOAT m_MidDC; //DC offset of the mid
 	FLOAT m_SideDC; //DC offset of the side
+
+	STEREO_FFT_WINDOW_FUNCTION m_WindowFunction;
 
 	/* Generates the left mix from the history buffer. */
 	VOID GenerateLeft();

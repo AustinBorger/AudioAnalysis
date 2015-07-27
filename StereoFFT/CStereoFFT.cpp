@@ -36,7 +36,16 @@ m_NumSamples(0),
 m_ComplexBuffer(nullptr),
 m_ProcessBuffer(nullptr),
 m_Window(nullptr),
-m_Plan(nullptr)
+m_Plan(nullptr),
+m_LeftMix(nullptr),
+m_RightMix(nullptr),
+m_MidMix(nullptr),
+m_SideMix(nullptr),
+m_LeftTransform(nullptr),
+m_RightTransform(nullptr),
+m_MidTransform(nullptr),
+m_SideTransform(nullptr),
+m_WindowFunction(STEREO_FFT_WINDOW_FUNCTION_RECTANGLE)
 { }
 
 CStereoFFT::~CStereoFFT() {
@@ -64,6 +73,7 @@ CStereoFFT::~CStereoFFT() {
 
 HRESULT CStereoFFT::Initialize(const STEREO_FFT_DESC& Desc) {
 	m_NumSamples = Desc.NumSamples;
+	m_WindowFunction = Desc.WindowFunction;
 
 	//Allocate all buffers
 	m_HistoryBuffer = fftwf_alloc_real(m_NumSamples * 2);
@@ -88,7 +98,7 @@ HRESULT CStereoFFT::Initialize(const STEREO_FFT_DESC& Desc) {
 	m_SideTransform = fftwf_alloc_real(m_NumSamples / 2);
 	m_MidTransform = fftwf_alloc_real(m_NumSamples / 2);
 
-	WindowFunction(Desc.WindowFunction, m_Window, m_NumSamples);
+	WindowFunction(m_WindowFunction, m_Window, m_NumSamples);
 
 	return S_OK;
 }
@@ -120,6 +130,13 @@ VOID CStereoFFT::Process() {
 	ProcessMix(m_RightMix, m_RightTransform, m_RightDC);
 	ProcessMix(m_MidMix, m_MidTransform, m_MidDC);
 	ProcessMix(m_SideMix, m_SideTransform, m_SideDC);
+}
+
+VOID CStereoFFT::SetWindowFunction(STEREO_FFT_WINDOW_FUNCTION WindowFunction) {
+	if (m_WindowFunction != WindowFunction) {
+		m_WindowFunction = WindowFunction;
+		::WindowFunction(m_WindowFunction, m_Window, m_NumSamples);
+	}
 }
 
 VOID CStereoFFT::GenerateLeft() {

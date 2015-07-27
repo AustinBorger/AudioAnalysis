@@ -25,6 +25,7 @@
 #include <Windows.h>
 #include <comdef.h>
 
+/* The type of window function to use. */
 enum STEREO_FFT_WINDOW_FUNCTION {
 	STEREO_FFT_WINDOW_FUNCTION_RECTANGLE,
 	STEREO_FFT_WINDOW_FUNCTION_TRIANGLE,
@@ -36,13 +37,16 @@ enum STEREO_FFT_WINDOW_FUNCTION {
 	STEREO_FFT_WINDOW_FUNCTION_BLACKMAN_NUTTALL,
 	STEREO_FFT_WINDOW_FUNCTION_BLACKMAN_HARRIS,
 	STEREO_FFT_WINDOW_FUNCTION_FLAT_TOP,
-	STEREO_FFT_WINDOW_FUNCTION_COSINE
+	STEREO_FFT_WINDOW_FUNCTION_COSINE,
+	STEREO_FFT_WINDOW_FUNCTION_GAUSSIAN,
+	STEREO_FFT_WINDOW_FUNCTION_CONFINED_GAUSSIAN,
+	STEREO_FFT_WINDOW_FUNCTION_DOLPH_CHEBYSHEV
 };
 
 /* FFT Descriptor */
 struct STEREO_FFT_DESC {
-	UINT NumSamples;
-	STEREO_FFT_WINDOW_FUNCTION WindowFunction;
+	UINT NumSamples; //The number of input samples (number of bins * 2)
+	STEREO_FFT_WINDOW_FUNCTION WindowFunction; //The window function used by the FFT
 };
 
 /* The StereoFFT interface. */
@@ -56,6 +60,12 @@ struct __declspec(uuid("6ec6f647-b334-40d5-ab37-45b5b76ba4ac")) IStereoFFT : pub
 	** Note that this will apply a high-quality window to your data, so there is no
 	** need to pre-calculate your own. */
 	virtual VOID STDMETHODCALLTYPE Process() PURE;
+
+	/* Sets the window function used by the FFT. */
+	virtual VOID STDMETHODCALLTYPE SetWindowFunction(STEREO_FFT_WINDOW_FUNCTION WindowFunction) PURE;
+
+	/* Returns the window function currently being used by the FFT. */
+	virtual STEREO_FFT_WINDOW_FUNCTION STDMETHODCALLTYPE GetWindowFunction() PURE;
 
 	/* Returns the number of samples being operated on. */
 	virtual UINT STDMETHODCALLTYPE GetNumSamples() PURE;

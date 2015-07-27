@@ -35,6 +35,9 @@ VOID BlackmanHarris(PFLOAT W, UINT N);
 VOID BlackmanNuttall(PFLOAT W, UINT N);
 VOID FlatTop(PFLOAT W, UINT N);
 VOID Cosine(PFLOAT W, UINT N);
+VOID Gaussian(PFLOAT W, UINT N);
+VOID ConfinedGaussian(PFLOAT W, UINT N);
+VOID DolphChebyshev(PFLOAT W, UINT N);
 
 VOID WindowFunction(STEREO_FFT_WINDOW_FUNCTION Function, PFLOAT Buffer, UINT N) {
 	switch (Function) {
@@ -60,6 +63,12 @@ VOID WindowFunction(STEREO_FFT_WINDOW_FUNCTION Function, PFLOAT Buffer, UINT N) 
 		return FlatTop(Buffer, N);
 	case STEREO_FFT_WINDOW_FUNCTION_COSINE:
 		return Cosine(Buffer, N);
+	case STEREO_FFT_WINDOW_FUNCTION_GAUSSIAN:
+		return Gaussian(Buffer, N);
+	case STEREO_FFT_WINDOW_FUNCTION_CONFINED_GAUSSIAN:
+		return ConfinedGaussian(Buffer, N);
+	case STEREO_FFT_WINDOW_FUNCTION_DOLPH_CHEBYSHEV:
+		return DolphChebyshev(Buffer, N);
 	default:
 		return Rectangle(Buffer, N);
 	}
@@ -186,4 +195,76 @@ VOID Cosine(PFLOAT W, UINT N) {
 	for (UINT n = 0; n < N; n++) {
 		W[n] = sin(float(M_PI) * n / L);
 	}
+}
+
+VOID Gaussian(PFLOAT W, UINT N) {
+	float L = float(N - 1);
+	float sigma = 0.5f;
+
+	for (UINT n = 0; n < N; n++) {
+		W[n] = exp(-0.5f * pow((float(n) - L / 2) / (sigma * L / 2), 2));
+	}
+}
+
+VOID ConfinedGaussian(PFLOAT W, UINT N) {
+	float fN = float(N);
+	float sigma = fN * 0.1f;
+	float L = float(N - 1);
+
+	static const auto G = [&](float x) {
+		return exp(-pow((x - L / 2) / (2 * sigma), 2));
+	};
+
+	float numerator = 0.0f;
+	float denominator = 0.0f;
+	float fn = 0.0f;
+
+	for (UINT n = 0; n < N; n++) {
+		fn = float(n);
+		numerator = G(-0.5f) * (G(fn + fN) + G(fn - fN));
+		denominator = G(-0.5f + fN) + G(-0.5f - fN);
+		W[n] = G(fn) - numerator / denominator;
+	}
+}
+
+//The code below was taken from http://practicalcryptography.com/miscellaneous/machine-learning/implementing-dolph-chebyshev-window/
+
+/**************************************************************************
+This function computes the chebyshev polyomial T_n(x)
+***************************************************************************/
+double cheby_poly(int n, double x) {
+	double res;
+	if (fabs(x) <= 1) res = cos(n*acos(x));
+	else              res = cosh(n*acosh(x));
+	return res;
+}
+
+/***************************************************************************
+calculate a chebyshev window of size N, store coeffs in out as in Antoniou
+-out should be array of size N
+-atten is the required sidelobe attenuation (e.g. if you want -60dB atten, use '60')
+***************************************************************************/
+void cheby_win(float *out, int N, float atten) {
+	int nn, i;
+	double M, n, sum = 0, max = 0;
+	double tg = pow(10, atten / 20);  /* 1/r term [2], 10^gamma [2] */
+	double x0 = cosh((1.0 / (N - 1))*acosh(tg));
+	M = (N - 1) / 2;
+	if (N % 2 == 0) M = M + 0.5; /* handle even length windows */
+	for (nn = 0; nn<(N / 2 + 1); nn++) {
+		n = nn - M;
+		sum = 0;
+		for (i = 1; i <= M; i++) {
+			sum += cheby_poly(N - 1, x0*cos(M_PI*i / N))*cos(2.0*n*M_PI*i / N);
+		}
+		out[nn] = float(tg + 2 * sum);
+		out[N - nn - 1] = out[nn];
+		if (out[nn]>max)max = out[nn];
+	}
+	for (nn = 0; nn<N; nn++) out[nn] /= float(max); /* normalise everything */
+	return;
+}
+
+VOID DolphChebyshev(PFLOAT W, UINT N) {
+	cheby_win(W, N, 120.0f);
 }
