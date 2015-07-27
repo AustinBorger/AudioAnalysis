@@ -164,7 +164,7 @@ VOID WindowCallback::CreateDevice() {
 
 	STEREO_FFT_DESC TransformDesc;
 	TransformDesc.NumSamples = 1024;
-	TransformDesc.WindowFunction = STEREO_FFT_WINDOW_FUNCTION_CONFINED_GAUSSIAN;
+	TransformDesc.WindowFunction = STEREO_FFT_WINDOW_FUNCTION_TUKEY;
 
 	hr = CreateStereoFFT(&TransformDesc, &m_StereoFFT);
 	HANDLE_HR(__LINE__);

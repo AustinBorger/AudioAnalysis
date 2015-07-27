@@ -25,7 +25,7 @@
 #include <math.h>
 
 VOID Rectangle(PFLOAT W, UINT N);
-VOID Triangle(PFLOAT W, UINT N);
+VOID Bartlett(PFLOAT W, UINT N);
 VOID Welch(PFLOAT W, UINT N);
 VOID Hanning(PFLOAT W, UINT N);
 VOID Hamming(PFLOAT W, UINT N);
@@ -37,14 +37,15 @@ VOID FlatTop(PFLOAT W, UINT N);
 VOID Cosine(PFLOAT W, UINT N);
 VOID Gaussian(PFLOAT W, UINT N);
 VOID ConfinedGaussian(PFLOAT W, UINT N);
+VOID Tukey(PFLOAT W, UINT N);
 VOID DolphChebyshev(PFLOAT W, UINT N);
 
 VOID WindowFunction(STEREO_FFT_WINDOW_FUNCTION Function, PFLOAT Buffer, UINT N) {
 	switch (Function) {
 	case STEREO_FFT_WINDOW_FUNCTION_RECTANGLE:
 		return Rectangle(Buffer, N);
-	case STEREO_FFT_WINDOW_FUNCTION_TRIANGLE:
-		return Triangle(Buffer, N);
+	case STEREO_FFT_WINDOW_FUNCTION_BARTLETT:
+		return Bartlett(Buffer, N);
 	case STEREO_FFT_WINDOW_FUNCTION_WELCH:
 		return Welch(Buffer, N);
 	case STEREO_FFT_WINDOW_FUNCTION_HANNING:
@@ -67,6 +68,8 @@ VOID WindowFunction(STEREO_FFT_WINDOW_FUNCTION Function, PFLOAT Buffer, UINT N) 
 		return Gaussian(Buffer, N);
 	case STEREO_FFT_WINDOW_FUNCTION_CONFINED_GAUSSIAN:
 		return ConfinedGaussian(Buffer, N);
+	case STEREO_FFT_WINDOW_FUNCTION_TUKEY:
+		return Tukey(Buffer, N);
 	case STEREO_FFT_WINDOW_FUNCTION_DOLPH_CHEBYSHEV:
 		return DolphChebyshev(Buffer, N);
 	default:
@@ -80,7 +83,7 @@ VOID Rectangle(PFLOAT W, UINT N) {
 	}
 }
 
-VOID Triangle(PFLOAT W, UINT N) {
+VOID Bartlett(PFLOAT W, UINT N) {
 	float L = float(N - 1);
 
 	for (UINT n = 0; n < N; n++) {
@@ -224,6 +227,21 @@ VOID ConfinedGaussian(PFLOAT W, UINT N) {
 		numerator = G(-0.5f) * (G(fn + fN) + G(fn - fN));
 		denominator = G(-0.5f + fN) + G(-0.5f - fN);
 		W[n] = G(fn) - numerator / denominator;
+	}
+}
+
+VOID Tukey(PFLOAT W, UINT N) {
+	float a = 0.5f;
+	float L = float(N - 1);
+
+	for (UINT n = 0; n < N; n++) {
+		if (n <= a * L / 2.0f) {
+			W[n] = 0.5f * (1.0f + cos(float(M_PI) * (2.0f * float(n) / (a * L) - 1.0f)));
+		} else if (n <= L * (1.0f - a / 2.0f)) {
+			W[n] = 1.0f;
+		} else {
+			W[n] = 0.5f * (1.0f + cos(float(M_PI) * (2.0f * float(n) / (a * L) - (2.0f / a) + 1.0f)));
+		}
 	}
 }
 
