@@ -1,25 +1,8 @@
-﻿Build started 7/27/2015 4:15:12 PM.
+﻿Build started 7/30/2015 12:08:20 AM.
      1>Project "C:\Users\Austin\Documents\COM Objects\StereoFFT\StereoFFT_Test\StereoFFT_Test.vcxproj" on node 2 (Build target(s)).
-     1>FxCompile:
-         C:\Program Files (x86)\Windows Kits\8.1\bin\x86\fxc.exe /nologo /E"main" /T ps_5_0 /Fh "AllPS.h" /Fo "C:\Users\Austin\Documents\COM Objects\StereoFFT\Debug\AllShader.cso" /Vn "AllPS" /Od /Zi AllShader.hlsl 
-         compilation header save succeeded; see C:\Users\Austin\Documents\COM Objects\StereoFFT\StereoFFT_Test\AllPS.h
-         compilation object save succeeded; see C:\Users\Austin\Documents\COM Objects\StereoFFT\Debug\AllShader.cso
-         C:\Program Files (x86)\Windows Kits\8.1\bin\x86\fxc.exe /nologo /E"main" /T ps_5_0 /Fh "LeftRightMaximaPS.h" /Fo "C:\Users\Austin\Documents\COM Objects\StereoFFT\Debug\LeftRightMaxima.cso" /Vn "LeftRightMaximaPS" /Od /Zi LeftRightMaxima.hlsl 
-         compilation header save succeeded; see C:\Users\Austin\Documents\COM Objects\StereoFFT\StereoFFT_Test\LeftRightMaximaPS.h
-         compilation object save succeeded; see C:\Users\Austin\Documents\COM Objects\StereoFFT\Debug\LeftRightMaxima.cso
-         C:\Program Files (x86)\Windows Kits\8.1\bin\x86\fxc.exe /nologo /E"main" /T ps_5_0 /Fh "LeftRightAllPS.h" /Fo "C:\Users\Austin\Documents\COM Objects\StereoFFT\Debug\LeftRightShader.cso" /Vn "LeftRightAllPS" /Od /Zi LeftRightShader.hlsl 
-         compilation header save succeeded; see C:\Users\Austin\Documents\COM Objects\StereoFFT\StereoFFT_Test\LeftRightAllPS.h
-         compilation object save succeeded; see C:\Users\Austin\Documents\COM Objects\StereoFFT\Debug\LeftRightShader.cso
-         C:\Program Files (x86)\Windows Kits\8.1\bin\x86\fxc.exe /nologo /E"main" /T ps_5_0 /Fh "MaximaPS.h" /Fo "C:\Users\Austin\Documents\COM Objects\StereoFFT\Debug\Maxima.cso" /Vn "MaximaPS" /Od /Zi Maxima.hlsl 
-         compilation header save succeeded; see C:\Users\Austin\Documents\COM Objects\StereoFFT\StereoFFT_Test\MaximaPS.h
-         compilation object save succeeded; see C:\Users\Austin\Documents\COM Objects\StereoFFT\Debug\Maxima.cso
-       ClCompile:
-         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /I../Include/ /I../StereoFFT/ /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt App.cpp Main.cpp StreamCallback.cpp WindowCallback.cpp
+     1>ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /I../Include/ /I../StereoFFT/ /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt WindowCallback.cpp
          WindowCallback.cpp
-         StreamCallback.cpp
-         Main.cpp
-         App.cpp
-         Generating Code...
        Link:
          C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\Austin\Documents\COM Objects\StereoFFT\Debug\StereoFFT_Test.exe" /INCREMENTAL /NOLOGO /LIBPATH:../Lib/Debug/ /LIBPATH:../Debug/ kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:\Users\Austin\Documents\COM Objects\StereoFFT\Debug\StereoFFT_Test.pdb" /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\Austin\Documents\COM Objects\StereoFFT\Debug\StereoFFT_Test.lib" /MACHINE:X86 Debug\App.obj
          Debug\Main.obj
@@ -30,4 +13,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:06.61
+Time Elapsed 00:00:02.03
